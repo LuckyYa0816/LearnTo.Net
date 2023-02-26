@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 
@@ -111,7 +112,55 @@ namespace LanguageFeatures.Controllers
             decimal cartTotal = products.TotalPrice();
             decimal arryTotal = products.TotalPrice();
 
-            return View("Result", (object)String.Format("Cart Total:{0},Array Total: {1}", cartTotal,arryTotal));
+            return View("Result",
+                (object)String.Format("Cart Total:{0},Array Total: {1}", cartTotal, arryTotal));
+        }
+
+        public ViewResult UseFilterExtensionMethod()
+        {
+            IEnumerable<Product> products = new ShoppingCart
+            {
+                Products = new List<Product>
+                {
+                    new Product {Name = "Kayak", Price = 275M,Category="Watersports"},
+                    new Product {Name = "Lifejacket", Price = 48.95M,Category="Watersports"},
+                    new Product {Name = "Soccer ball", Price = 19.50M,Category="Soccer"},
+                    new Product {Name = "Corner flag", Price = 34.95M,Category="Soccer"}
+                }
+            };
+
+            /*
+            Func<Product, bool> categoryFilter = delegate (Product prod)
+            {
+                return prod.Category == "Soccer";
+            };
+            */
+            Func<Product, bool> categoryFilter = prod => prod.Category == "Soccer";
+
+            decimal total = 0;
+            foreach (Product pro in products.Filter(prod => prod.Category == "Soccer" || prod.Price > 20))
+            {
+                total += pro.Price;
+            }
+
+            return View("Result", (object)String.Format("Total: {0}",total));
+        }
+
+        public ViewResult CreateAnonArray()
+        {
+            var oddsAndEnds = new[]
+            {
+                new {Name ="MVC",Category = "Pattern"},
+                new {Name ="Hat",Category = "Clothing"},
+                new {Name ="Apple",Category = "Fruit"}
+            };
+
+            StringBuilder result = new StringBuilder();
+            foreach(var item in oddsAndEnds)
+            {
+                result.Append(item.Name).Append(" ");
+            }
+            return View("Result", (object)result.ToString());
         }
     }
 }
